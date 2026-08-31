@@ -161,6 +161,15 @@ individual capturada en los modelos. Detalle completo en
 - **EAD aproximado:** se usa `out_prncp`/`total_rec_prncp` (saldo
   pendiente al momento del default) en vez del monto original, lo que
   reduce pero no elimina la aproximación.
+- **`risk_percentile` no es comparable entre `accepted` y `rejected`:**
+  se calcula como el percentil de riesgo relativo *dentro de cada
+  dataset por separado* (porque `fico` y `Risk_Score` no están en la
+  misma escala), no una medida de riesgo absoluta y comparable entre
+  ambos grupos. Esto se refleja en el modelo de demanda de la Fase 5:
+  el coeficiente de `risk_percentile` en la regresión logística sale
+  negativo (contraintuitivo a primera vista) porque mezcla la escala
+  relativa de cada dataset. Ver `notebooks/02_demand_model.ipynb` para
+  el detalle.
 
 ## Referencias
 
