@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+venv/
+.venv/
+env/
+
+# Datos: crudos y procesados no se versionan (son grandes y reproducibles vía script)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Kaggle descarga zips temporales
+*.zip
+
+# Modelos entrenados (grandes, reproducibles)
+models/*
+!models/.gitkeep
+
+.DS_Store
