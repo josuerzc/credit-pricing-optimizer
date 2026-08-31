@@ -72,9 +72,7 @@ def count_data_rows(path: Path) -> int:
     return n - 1
 
 
-def sample_csv_gz(
-    path: Path, n_total_rows: int, n_sample: int, random_state: int
-) -> pd.DataFrame:
+def sample_csv_gz(path: Path, n_total_rows: int, n_sample: int, random_state: int) -> pd.DataFrame:
     """Toma una muestra aleatoria simple y reproducible de n_sample filas de un csv.gz."""
     rng = np.random.RandomState(random_state)
     chosen = rng.choice(n_total_rows, size=n_sample, replace=False)
