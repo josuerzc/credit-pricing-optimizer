@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import re
 
+import numpy as np
 import pandas as pd
 
 # --------------------------------------------------------------------------
@@ -161,3 +162,70 @@ def clean_rejected(df: pd.DataFrame) -> pd.DataFrame:
     out["purpose_clean"] = out["Loan Title"].map(map_loan_title_to_purpose)
 
     return out
+
+
+def build_demand_dataset(
+    accepted_clean: pd.DataFrame, rejected_clean: pd.DataFrame
+) -> pd.DataFrame:
+    """Une `accepted` (limpio) y `rejected` (limpio) en un único dataset de demanda.
+
+    La variable objetivo `acepto_prestamo` es 1 para toda fila proveniente de
+    `accepted` y 0 para toda fila proveniente de `rejected`. Es un PROXY, no una
+    medición perfecta de F̄_i(r) (la fracción que acepta, en la notación de
+    Phillips 2013): `rejected` no distingue si fue el cliente quien rechazó la
+    oferta o el banco quien rechazó la solicitud antes de llegar a ofertar nada,
+    mientras que Phillips asume que la demanda `D_i` ya pasó underwriting. Se usa
+    de todos modos por ser la mejor aproximación disponible en un dataset público
+    -- ver README para el detalle completo de esta limitación.
+
+    Solo se homogeneizan las columnas presentes (o derivables) en AMBOS
+    datasets, con el mismo mapeo documentado en `notebooks/01_eda.ipynb`:
+    monto, dti, antigüedad laboral, propósito, ubicación (zip/estado).
+
+    `fico` (accepted) y `risk_score` (rejected) se mantienen como columnas
+    SEPARADAS -- no se homologan a una sola escala de riesgo porque no son
+    comparables (FICO ~300-850 vs. la escala propia de Risk_Score de
+    LendingClub). Cada fila tendrá NaN en la columna que no le corresponde.
+
+    `int_rate` (tasa) solo existe en `accepted`: un solicitante rechazado
+    nunca llega a que se le cotice una tasa, así que queda NaN para toda
+    fila de `rejected`. Esta asimetría es una limitación estructural del
+    dataset (no se inventa una tasa "hipotética" para los rechazos) y se
+    resuelve a nivel de feature engineering en el modelo de demanda
+    (Fase 5), no aquí.
+    """
+    accepted_part = pd.DataFrame(
+        {
+            "acepto_prestamo": 1,
+            "monto": accepted_clean["funded_amnt"],
+            "dti": accepted_clean["dti_clean"],
+            "fico": accepted_clean["fico"],
+            "risk_score": np.nan,
+            "emp_length_years": accepted_clean["emp_length_years"],
+            "purpose": accepted_clean["purpose_clean"],
+            "zip_code": accepted_clean["zip_code"],
+            "addr_state": accepted_clean["addr_state"],
+            "int_rate": accepted_clean["int_rate"],
+            "fecha_solicitud": accepted_clean["issue_d"],
+            "source_dataset": "accepted",
+        }
+    )
+
+    rejected_part = pd.DataFrame(
+        {
+            "acepto_prestamo": 0,
+            "monto": rejected_clean["Amount Requested"],
+            "dti": rejected_clean["dti_clean"],
+            "fico": np.nan,
+            "risk_score": rejected_clean["Risk_Score"],
+            "emp_length_years": rejected_clean["emp_length_years"],
+            "purpose": rejected_clean["purpose_clean"],
+            "zip_code": rejected_clean["Zip Code"],
+            "addr_state": rejected_clean["State"],
+            "int_rate": np.nan,
+            "fecha_solicitud": rejected_clean["Application Date"],
+            "source_dataset": "rejected",
+        }
+    )
+
+    return pd.concat([accepted_part, rejected_part], ignore_index=True)
