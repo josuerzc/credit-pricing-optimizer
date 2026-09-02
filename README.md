@@ -17,6 +17,19 @@ El proyecto combina tres piezas:
 3. **Frontera eficiente** — 5 escenarios de política de pricing con
    distintos trade-offs entre volumen colocado y utilidad neta.
 
+## Resultado principal
+
+Comparando contra el pricing histórico real de LendingClub (Punto A),
+el "Punto B" de Phillips (utilidad máxima manteniendo el volumen
+histórico) genera un upside modesto pero real: +0.8% de utilidad neta
+esperada al mismo volumen. El upside es chico porque el pricing
+histórico de LendingClub ya está razonablemente alineado con el riesgo
+(la tasa sube monótonamente con el grado, igual que la PD medida). El
+valor del proyecto está en el marco cuantitativo y auditable — incluida
+la frontera completa de 5 escenarios — más que en una ganancia
+dramática. Detalle completo en
+[`notebooks/07_validation_business_case.ipynb`](notebooks/07_validation_business_case.ipynb).
+
 ## Fundamento académico
 
 La función de rentabilidad y el planteamiento de optimización están
@@ -92,6 +105,7 @@ notebooks/
   04_aggregation_subgrade.ipynb   agregación individual -> sub_grade
   05_optimization.ipynb
   06_efficient_frontier.ipynb
+  07_validation_business_case.ipynb  validación contra pricing histórico y resumen ejecutivo
 src/
   download_sample.py  descarga y muestreo reproducible (Kaggle CLI)
   preprocessing.py    limpieza y unión de datasets
